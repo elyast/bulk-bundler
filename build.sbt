@@ -11,8 +11,6 @@ scalaVersion in ThisBuild := "2.11.4"
 
 organization in ThisBuild := "com.nokia.bundles"
 
-autoScalaLibrary in ThisBuild := false
-
 publishTo in ThisBuild := Some(Resolver.file("file", new File("./deploy")))
 
 scalacOptions in ThisBuild ++= Seq("-unchecked", "-deprecation", "-feature")
