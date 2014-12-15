@@ -26,8 +26,8 @@ object BundlifyBuild extends Build {
   val cassandraVersion = "2.1.2"
 
   val all = "*"
-  val sbtImport = List("org.scalatools.testing;version=\"[1.0, 2)\";resolution:=optional",
-                       "sbt.testing;version=\"[1.0, 2)\";resolution:=optional")
+  val sbtImport = List("org.scalatools.testing;resolution:=optional",
+                       "sbt.testing;resolution:=optional")
   val http4sHost = Some("org.http4s.core")
   val blazeHost = Some("org.http4s.blazecore")
 
@@ -110,13 +110,29 @@ object BundlifyBuild extends Build {
                importPackage = List("scala.reflect.macros.contexts;version=\"[2.11, 3)\";resolution:=optional",
                  "scala.tools.nsc.*;version=\"[2.11, 3)\";resolution:=optional") :+ all ),
 
+    BundleDesc("org.mockito.core", "org.mockito" % "mockito-core" % "1.9.5",
+               exportPackage = List("org.mockito.*"),
+               importPackage = List("junit.framework;resolution:=optional",
+                  "org.apache.tools.ant;resolution:=optional",
+                  "org.apache.tools.ant.types;resolution:=optional",
+                  "org.hamcrest;version=\"[1.0,2.0)\"",
+                  "org.junit;resolution:=optional",
+                  "org.junit.internal.runners;resolution:=optional",
+                  "org.junit.runner;resolution:=optional",
+                  "org.junit.runner.manipulation;resolution:=optional",
+                  "org.junit.runner.notification;resolution:=optional",
+                  "org.junit.runners;resolution:=optional",
+                  "org.objenesis;version=\"[1.0,2.0)\"",
+                  "org.junit.runners.model;resolution:=optional") :+ all),
+
     BundleDesc("jedis", "redis.clients" % "jedis" % "2.6.0",
                exportPackage = List("redis.clients.*")),
 
     BundleDesc("io.searchbox.jest",
                List("io.searchbox" % "jest" % esVersion,
                     "io.searchbox" % "jest-common" % esVersion),
-               exportPackage = List("io.searchbox.*;-split-package:=merge-first")),
+               exportPackage = List("io.searchbox.*;-split-package:=merge-first"),
+               importPackage = List("com.google.common.*;version=\"[16.0,17.0)\"") :+ all),
 
     BundleDesc("org.apache.httpcomponents.httpcore.nio", "org.apache.httpcomponents" % "httpcore-nio" % httpCoreVersion,
                exportPackage = List("org.apache.http.nio.*", "org.apache.http.impl.nio.*")),
@@ -151,7 +167,7 @@ object BundlifyBuild extends Build {
     SourceDesc("com.datastax.driver.core", "com.datastax.cassandra" % "cassandra-driver-core" % cassandraVersion),
 
     SourceDesc("com.codahale.metrics.core", "com.codahale.metrics" % "metrics-core" % "3.0.2"),
-    SourceDesc("com.google.guava", "com.google.guava" % "guava" % "18.0", version = Some("18.0.0"))
+    SourceDesc("com.google.guava", "com.google.guava" % "guava" % "16.0.1")
 
   )
 
