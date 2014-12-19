@@ -1,17 +1,20 @@
+
 import sbt._
 import Keys._
+import sbtassembly.Plugin._
+import AssemblyKeys._
 import com.typesafe.sbt.osgi.SbtOsgi._
-
+import sbt.Package.ManifestAttributes
 
 case class BundleDesc(symbolicName: String, deps: Seq[ModuleID], importPackage: Seq[String] = List("*"),
                       exportPackage: Seq[String] = List("*"), fragmentHost: Option[String] = None,
-                      headers: Map[String, String] = Map())
+                      headers: Map[String, String] = Map(), overrideVersion: Option[String] = None)
 
-case class SourceDesc(symbolicName: String, deps: Seq[ModuleID], version: Option[String] = None,
-                      exportPackage: Seq[String] = List("*"))
+case class SourceDesc(symbolicName: String, deps: Seq[ModuleID], overrideVersion: Option[String] = None)
 
 
 object BundlifyBuild extends Build {
+
   val rhoVersion = "0.2.0"
   val http4sVersion = "0.4.2"
   val specsVersion = "3.0-M1"
@@ -42,7 +45,8 @@ object BundlifyBuild extends Build {
                "org.specs2" %% "specs2-scalacheck" % specsVersion),
                exportPackage = List("org.specs2.*;-split-package:=merge-first", "specs2.*;-split-package:=merge-first"),
                importPackage = sbtImport :+ all,
-               headers = Map("Eclipse-BuddyPolicy" -> "dependent", "Bundle-ActivationPolicy" -> "lazy")),
+               headers = Map("Eclipse-BuddyPolicy" -> "dependent", "Bundle-ActivationPolicy" -> "lazy"),
+               overrideVersion = Some("3.0.0.M1")),
 
     BundleDesc("org.scalacheck", "org.scalacheck" %% "scalacheck" % "1.12.1",
                exportPackage = List("org.scalacheck.*;-split-package:=first"),
@@ -80,7 +84,8 @@ object BundlifyBuild extends Build {
                exportPackage = List("org.http4s.argonaut.*")),
 
     BundleDesc("io.argonaut", "io.argonaut" %% "argonaut" % "6.1-M4",
-               exportPackage = List("argonaut.*")),
+               exportPackage = List("argonaut.*"),
+               overrideVersion = Some("6.1.0.M4")),
     BundleDesc("org.eclipse.jetty.npn.api", "org.eclipse.jetty.npn" % "npn-api" % npnVersion,
                exportPackage = List("org.eclipse.jetty.npn.*")),
     BundleDesc("org.eclipse.jetty.npn.boot", "org.mortbay.jetty.npn" % "npn-boot" % npnVersion,
@@ -139,20 +144,27 @@ object BundlifyBuild extends Build {
 
     BundleDesc("org.apache.kafka.clients", "org.apache.kafka" % "kafka-clients" % kafkaVersion,
                exportPackage = List("org.apache.kafka.*"),
-               importPackage = List("net.jpountz.*;version=\"[1.2, 2.0)\";resolution:=optional") :+ all),
+               importPackage = List("net.jpountz.*;version=\"[1.2, 2.0)\";resolution:=optional") :+ all,
+               overrideVersion = Some("0.8.2.beta")),
     BundleDesc("org.apache.kafka.core", "org.apache.kafka" %% "kafka" % kafkaVersion exclude("org.scala-lang", "scala-library"),
                exportPackage = List("kafka.*"),
                importPackage = List("com.yammer.metrics;version=\"[2.2, 3)\";resolution:=optional",
                "com.yammer.metrics.core;version=\"[2.2, 3)\";resolution:=optional",
                "com.yammer.metrics.reporting;version=\"[2.2, 3)\";resolution:=optional",
                "joptsimple;version=\"[3.2, 4)\";resolution:=optional",
-               "sun.*;resolution:=optional") :+ all)
+               "sun.*;resolution:=optional") :+ all,
+               overrideVersion = Some("0.8.2.beta")),
+
+    BundleDesc("com.scalarx", "com.scalarx" %% "scalarx" % "0.2.7-M1",
+               exportPackage = List("rx.*"),
+               importPackage = List("akka.actor;version=\"[2.3, 3)\";resolution:=optional") :+ all,
+               overrideVersion = Some("0.2.7.M1"))
   )
 
   lazy val sourceToWrap = List(
     SourceDesc("com.chuusai.shapeless.core", "com.chuusai" %% "shapeless" % "2.0.0"),
 
-    SourceDesc("org.scalaz.stream", "org.scalaz.stream" %% "scalaz-stream" % "0.6a", version = Some("0.0.0.6a")),
+    SourceDesc("org.scalaz.stream", "org.scalaz.stream" %% "scalaz-stream" % "0.6a", overrideVersion = Some("0.0.0.6a")),
     SourceDesc("org.scalaz.concurrent", "org.scalaz" %% "scalaz-concurrent" % scalazVersion),
     SourceDesc("org.scalaz.core", "org.scalaz" %% "scalaz-core" % scalazVersion),
     SourceDesc("org.scalaz.effect", "org.scalaz" %% "scalaz-effect" % scalazVersion),
@@ -167,30 +179,42 @@ object BundlifyBuild extends Build {
     SourceDesc("com.datastax.driver.core", "com.datastax.cassandra" % "cassandra-driver-core" % cassandraVersion),
 
     SourceDesc("com.codahale.metrics.core", "com.codahale.metrics" % "metrics-core" % "3.0.2"),
-    SourceDesc("com.google.guava", "com.google.guava" % "guava" % "16.0.1")
+    SourceDesc("com.google.guava", "com.google.guava" % "guava" % "16.0.1"),
+    SourceDesc("com.google.gson", "com.google.code.gson" % "gson" % "2.3"),
+    SourceDesc("org.apache.commons.lang3", "org.apache.commons" % "commons-lang3" % "3.3.2"),
+    SourceDesc("org.apache.commons.pool2", "org.apache.commons" % "commons-pool2" % "2.0", overrideVersion = Some("2.0.0")),
+    SourceDesc("org.apache.servicemix.bundles.cglib", "cglib" % "cglib-nodep" % "3.1", overrideVersion = Some("3.1.0.1")),
+
+    SourceDesc("org.helgoboss.capsule", "org.helgoboss" % "capsule" % "1.1.0", overrideVersion = Some("1.1.1")),
+    SourceDesc("org.helgoboss.domino", "org.helgoboss" % "domino" % "1.0.0", overrideVersion = Some("1.0.1")),
+    SourceDesc("org.helgoboss.scala-osgi-metatype", "org.helgoboss" % "scala-osgi-metatype" % "1.0.0", overrideVersion = Some("1.0.1")),
+    SourceDesc("dire.core", "dire" %% "dire-core" % "0.2.0")
 
   )
 
   lazy val binProjects = bundleToWrap.map {
     bundleSpec => {
       val dep = bundleSpec.deps(0)
+      val bundleVersion = bundleSpec.overrideVersion.getOrElse(dep.revision)
       val projectSettings = osgiSettings ++ Seq(
         OsgiKeys.privatePackage := Nil,
         OsgiKeys.exportPackage := bundleSpec.exportPackage, //List("*;version=\"" + dep.revision + "\""),
         OsgiKeys.importPackage := bundleSpec.importPackage,
-        OsgiKeys.bundleVersion := dep.revision,
+        OsgiKeys.bundleVersion := bundleVersion,
         OsgiKeys.additionalHeaders := bundleSpec.headers,
         OsgiKeys.bundleSymbolicName := bundleSpec.symbolicName,
         OsgiKeys.fragmentHost := bundleSpec.fragmentHost,
         version := dep.revision
       )
 
-      val srcProjectSettings = srcBundlesSettings(bundleSpec.symbolicName, dep.revision, bundleSpec.exportPackage)
+      val srcProjectName = dep.name + "-source"
+      val srcProjectSettings = srcBundlesSettings(srcProjectName, dep.revision, bundleSpec.symbolicName, bundleVersion)
       val sourceDeps = asSourceBundles(bundleSpec.deps)
       val binDeps =  bundleSpec.deps.map {
         originalDep => originalDep //intransitive()
       }
-      val srcProject = Project(id = dep.name + "-source", base = file(dep.name + "-source")).
+
+      val srcProject = Project(id = srcProjectName, base = file(srcProjectName)).
             settings(buildSettings ++ srcProjectSettings ++ Seq(libraryDependencies ++= sourceDeps) :_*)
       val binProject = Project(id = dep.name, base = file(dep.name)).
             settings(buildSettings ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ projectSettings ++
@@ -202,10 +226,11 @@ object BundlifyBuild extends Build {
   lazy val srcProjects = sourceToWrap.map {
     bundleSpec => {
       val dep = bundleSpec.deps(0)
-      val depVersion = bundleSpec.version.getOrElse(dep.revision)
-      val srcProjectSettings = srcBundlesSettings(bundleSpec.symbolicName, depVersion, bundleSpec.exportPackage)
+      val projectName = dep.name + "-source"
+      val bundleVersion = bundleSpec.overrideVersion.getOrElse(dep.revision)
+      val srcProjectSettings = srcBundlesSettings(projectName, dep.revision, bundleSpec.symbolicName, bundleVersion)
       val sourceDeps = asSourceBundles(bundleSpec.deps)
-      Project(id = dep.name + "-source", base = file(dep.name + "-source")).
+      Project(id = projectName, base = file(projectName)).
           settings(buildSettings ++ srcProjectSettings ++ Seq(libraryDependencies ++= sourceDeps) :_*)
     }
   }
@@ -224,16 +249,17 @@ object BundlifyBuild extends Build {
     }
   }
 
-  def srcBundlesSettings(symbolicName: String, ver: String, exportPackage: Seq[String]) = {
-      osgiSettings ++ Seq(
-        OsgiKeys.privatePackage := Nil,
-        OsgiKeys.exportPackage := List("!scala.*", "!dummy", "*;-split-package:=merge-first"),
-        resourceDirectory in Compile := file("./resources"),
-        OsgiKeys.importPackage := Nil,
-        OsgiKeys.bundleVersion := ver,
-        OsgiKeys.bundleSymbolicName := symbolicName + ".source",
-        OsgiKeys.additionalHeaders := Map("Eclipse-SourceBundle" -> (symbolicName + ";version=\"" + ver + "\"")),
-        version := ver
+  def srcBundlesSettings(projectName: String, projectVersion: String, symbolicName: String, bundleVersion: String) = {
+      assemblySettings ++ addArtifact(Artifact(projectName, "assembly"), assembly)  ++ Seq(
+        assemblyOption in assembly ~= { _.copy(includeScala = false) },
+        version := projectVersion,
+        packageOptions := Seq(ManifestAttributes(
+                      ("Eclipse-SourceBundle", (symbolicName + ";version=\"" + bundleVersion + "\"")),
+                      ("Bundle-ManifestVersion", "2"),
+                      ("Bundle-Name", symbolicName + ".source"),
+                      ("Bundle-SymbolicName", symbolicName + ".source"),
+                      ("Bundle-Version", bundleVersion)
+        ))
     )
   }
 
