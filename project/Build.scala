@@ -180,14 +180,7 @@ object BundlifyBuild extends Build {
 
     SourceDesc("com.codahale.metrics.core", "com.codahale.metrics" % "metrics-core" % "3.0.2"),
     SourceDesc("com.google.guava", "com.google.guava" % "guava" % "16.0.1"),
-    SourceDesc("com.google.gson", "com.google.code.gson" % "gson" % "2.3"),
-    SourceDesc("org.apache.commons.lang3", "org.apache.commons" % "commons-lang3" % "3.3.2"),
-    SourceDesc("org.apache.commons.pool2", "org.apache.commons" % "commons-pool2" % "2.0", overrideVersion = Some("2.0.0")),
-    SourceDesc("org.apache.servicemix.bundles.cglib", "cglib" % "cglib-nodep" % "3.1", overrideVersion = Some("3.1.0.1")),
-
-    SourceDesc("org.helgoboss.capsule", "org.helgoboss" % "capsule" % "1.1.0", overrideVersion = Some("1.1.1")),
     SourceDesc("org.helgoboss.domino", "org.helgoboss" % "domino" % "1.0.0", overrideVersion = Some("1.0.1")),
-    SourceDesc("org.helgoboss.scala-osgi-metatype", "org.helgoboss" % "scala-osgi-metatype" % "1.0.0", overrideVersion = Some("1.0.1")),
     SourceDesc("dire.core", "dire" %% "dire-core" % "0.2.0")
 
   )
