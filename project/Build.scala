@@ -17,7 +17,7 @@ object BundlifyBuild extends Build {
 
   val rhoVersion = "0.2.0"
   val http4sVersion = "0.4.2"
-  val specsVersion = "3.0-M1"
+  val specsVersion = "2.4.15"
   val scalazVersion = "7.1.0"
   val spireVersion = "0.8.2"
   val monocleVersion = "0.5.1"
@@ -45,8 +45,7 @@ object BundlifyBuild extends Build {
                "org.specs2" %% "specs2-scalacheck" % specsVersion),
                exportPackage = List("org.specs2.*;-split-package:=merge-first", "specs2.*;-split-package:=merge-first"),
                importPackage = sbtImport :+ all,
-               headers = Map("Eclipse-BuddyPolicy" -> "dependent", "Bundle-ActivationPolicy" -> "lazy"),
-               overrideVersion = Some("3.0.0.M1")),
+               headers = Map("Eclipse-BuddyPolicy" -> "dependent", "Bundle-ActivationPolicy" -> "lazy")),
 
     BundleDesc("org.scalacheck", "org.scalacheck" %% "scalacheck" % "1.12.1",
                exportPackage = List("org.scalacheck.*;-split-package:=first"),
